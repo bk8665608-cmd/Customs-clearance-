@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custom Clearing Agent Manager - GD + Tax Workflow</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+:root{
+  --ink:#0E1C2F; --ink2:#1D3557; --teal:#0D7377; --teal2:#14A085; --gold:#D4902A; --goldt:#F5C153;
+  --bg:#EEF2F7; --white:#fff; --border:#D0DCF0; --muted:#64748B; --green:#15803D; --gbg:#DCFCE7;
+  --red:#B91C1C; --rbg:#FEE2E2; --amber:#B45309; --abg:#FEF3C7; --blue:#1D4ED8; --bbg:#EFF6FF;
+  --shadow:0 2px 14px rgba(14,28,47,.10); --r:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,Arial,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+.hdr{background:linear-gradient(120deg,var(--ink),var(--ink2));height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:50;box-shadow:0 3px 18px rgba(14,28,47,.28)}
+.hdr-brand{display:flex;align-items:center;gap:12px}.hdr-ico{width:38px;height:38px;background:var(--teal);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:19px}
+.hdr-name{font-size:17px;font-weight:900;color:#fff}.hdr-sub,.hdr-date{font-size:12px;color:#7FAFD4}
+.wrap{display:flex;min-height:calc(100vh - 64px)}
+.sb{width:235px;background:var(--ink);padding:15px 0;flex-shrink:0}
+.nav{display:flex;align-items:center;gap:10px;padding:12px 18px;color:#7FAFD4;cursor:pointer;border-left:3px solid transparent;font-size:13px;font-weight:700;transition:.15s}
+.nav:hover{background:rgba(255,255,255,.06);color:#fff}.nav.on{background:rgba(13,115,119,.18);border-left-color:var(--teal2);color:var(--teal2)}
+.ndiv{height:1px;background:rgba(255,255,255,.08);margin:8px 14px}
+.main{flex:1;padding:22px;overflow-y:auto}.page{display:none}.page.on{display:block}
+.ph{margin-bottom:18px}.ph-title{font-size:22px;font-weight:900}.ph-sub{font-size:13px;color:var(--muted);margin-top:3px}
+.card{background:var(--white);border-radius:var(--r);box-shadow:var(--shadow);padding:20px;margin-bottom:18px}
+.card-t{font-size:14px;font-weight:800;color:var(--ink2);margin-bottom:14px;display:flex;align-items:center;gap:7px}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.sc{background:var(--white);border-radius:var(--r);padding:16px 18px;box-shadow:var(--shadow);border-top:4px solid var(--teal)}
+.sc.g{border-top-color:var(--green)}.sc.r{border-top-color:var(--red)}.sc.a{border-top-color:var(--gold)}.sc.b{border-top-color:var(--blue)}
+.sl{font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.6px}.sv{font-size:22px;font-weight:900;margin:3px 0}.ss{font-size:11px;color:var(--muted)}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}.fg4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.fgf{grid-column:1/-1}
+.fg{display:flex;flex-direction:column;gap:5px}.fg label{font-size:11px;font-weight:800;color:var(--ink2);text-transform:uppercase;letter-spacing:.4px}
+.fg input,.fg select,.fg textarea,.sbar input,.sbar select{padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;color:var(--ink);background:#FAFCFF}
+.fg input:focus,.fg select:focus,.fg textarea:focus,.sbar input:focus,.sbar select:focus{border-color:var(--teal);outline:none;background:#fff}
+.sec-lbl{font-size:10px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--teal);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.btn{padding:9px 16px;border-radius:8px;font-size:13px;font-weight:800;cursor:pointer;border:none;transition:.15s;font-family:inherit;display:inline-flex;align-items:center;gap:6px}
+.btn-teal{background:var(--teal);color:#fff}.btn-teal:hover{background:var(--teal2)}.btn-ink{background:var(--ink);color:#fff}.btn-out{background:#fff;color:var(--ink);border:1.5px solid var(--border)}
+.btn-g{background:var(--gbg);color:var(--green)}.btn-r{background:var(--rbg);color:var(--red)}.btn-a{background:var(--abg);color:var(--amber)}.btn-b{background:var(--bbg);color:var(--blue)}.btn-sm{padding:6px 11px;font-size:12px}
+.brow{display:flex;gap:9px;margin-top:14px;align-items:center;flex-wrap:wrap}
+.tw{overflow-x:auto;border-radius:9px;border:1px solid var(--border)}table{width:100%;border-collapse:collapse;font-size:13px}thead{background:var(--ink2);color:#fff}thead th{padding:11px 13px;font-weight:700;font-size:12px;text-align:left;white-space:nowrap}tbody tr{border-bottom:1px solid var(--border)}tbody tr:hover{background:#F5F9FF}tbody td{padding:11px 13px;vertical-align:middle}
+.right{text-align:right}.muted{color:var(--muted)}.bold{font-weight:900}
+.sbar{display:flex;gap:9px;margin-bottom:14px;align-items:center}.sbar input{flex:1}.sbar select{background:#fff}
+.bdg{display:inline-block;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:900}.bdg-g{background:var(--gbg);color:var(--green)}.bdg-r{background:var(--rbg);color:var(--red)}.bdg-a{background:var(--abg);color:var(--amber)}.bdg-b{background:var(--bbg);color:var(--blue)}
+.alert{padding:12px 15px;border-radius:9px;font-size:13px;margin-bottom:14px;display:none;align-items:center;gap:8px;font-weight:700}.alert-ok{background:var(--gbg);color:var(--green);border:1px solid #86EFAC}.alert-err{background:var(--rbg);color:var(--red);border:1px solid #FCA5A5}
+.totalbox{margin-top:14px;background:var(--bg);border-radius:10px;padding:15px}.totalgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.mini{background:#fff;border-radius:9px;padding:12px;text-align:center;border:1px solid var(--border)}.mini.dark{background:var(--ink);border-color:var(--ink)}
+.mini-l{font-size:10px;color:var(--muted);text-transform:uppercase;font-weight:800}.mini-v{font-size:18px;font-weight:900;margin-top:4px}.mini.dark .mini-l{color:#7FAFD4}.mini.dark .mini-v{color:var(--goldt)}
+.mbg{display:none;position:fixed;inset:0;background:rgba(14,28,47,.55);z-index:200;align-items:center;justify-content:center}.mbg.open{display:flex}.modal{background:#fff;border-radius:14px;padding:24px;width:94%;max-width:860px;max-height:92vh;overflow:auto;box-shadow:0 20px 60px rgba(14,28,47,.28)}.mhdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}.mtitle{font-size:18px;font-weight:900}.mclose{background:none;border:none;font-size:24px;cursor:pointer;color:var(--muted)}
+.statement-head{background:var(--ink);color:#fff;border-radius:10px 10px 0 0;padding:16px 20px;display:flex;justify-content:space-between;gap:12px}.statement-total{background:var(--ink);color:#fff;padding:13px 16px;display:flex;justify-content:space-between;gap:12px;border-radius:0 0 10px 10px}.bal{font-size:18px;color:var(--goldt);font-weight:900}
+.bottomnav{display:none}.empty{text-align:center;padding:34px;color:var(--muted);font-size:14px}.emo{font-size:36px;margin-bottom:7px}
+@media(max-width:860px){
+  body{padding-bottom:66px}.hdr{height:56px;padding:0 14px}.hdr-date{display:none}.hdr-name{font-size:14px}.hdr-sub{font-size:10px}.sb{display:none}.wrap{display:block}.main{padding:14px 12px}
+  .sg,.fg2,.fg3,.fg4,.totalgrid{grid-template-columns:1fr}.sbar{flex-wrap:wrap}.sbar input,.sbar select,.sbar .btn{flex:1 1 100%}.tw{overflow-x:auto}.card{padding:15px}.statement-head,.statement-total{flex-direction:column}.bottomnav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--ink);z-index:150;padding:7px 2px calc(7px + env(safe-area-inset-bottom));box-shadow:0 -4px 18px rgba(14,28,47,.25)}
+  .bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;color:#6B8FB5;font-size:9.5px;font-weight:700;padding:5px 2px;cursor:pointer}.bn-item .bn-ico{font-size:18px}.bn-item.on{color:var(--teal2)}
+}
+@media print{.sb,.hdr,.btn,.sbar,.brow,.mclose,.mbg,.bottomnav,.no-print{display:none!important}.main{padding:0}body{background:#fff}.card{box-shadow:none;border:1px solid #ddd}}
+</style>
+</head>
+<body>
+<div class="hdr">
+  <div class="hdr-brand"><div class="hdr-ico">🚛</div><div><div class="hdr-name">Custom Clearing Agent Manager</div><div class="hdr-sub">GD Master • Empty Weight Billing • Tax Details • Client Ledger</div></div></div>
+  <div class="hdr-date" id="hdrDate"></div>
+</div>
+
+<div class="wrap">
+  <div class="sb">
+    <div class="nav on" onclick="go('dash')">📊 Dashboard</div>
+    <div class="nav" onclick="go('clients')">👥 Clients</div>
+    <div class="nav" onclick="go('addClient')">➕ Naya Client</div>
+    <div class="ndiv"></div>
+    <div class="nav" onclick="go('addGD')">🧾 GD Add</div>
+    <div class="nav" onclick="go('taxDetails')">💰 GD Tax Details</div>
+    <div class="nav" onclick="go('gdList')">📦 GD Records</div>
+    <div class="ndiv"></div>
+    <div class="nav" onclick="go('payments')">💵 Payments</div>
+    <div class="nav" onclick="go('statements')">📄 Statements</div>
+    <div class="nav" onclick="go('backup')">🗂 Backup</div>
+  </div>
+
+  <div class="main">
+    <div id="gAlert" class="alert"></div>
+
+    <div id="pg-dash" class="page on">
+      <div class="ph"><div class="ph-title">📊 Dashboard</div><div class="ph-sub">Tamam clients, GD, taxes aur payments ka summary</div></div>
+      <div class="sg" id="dashStats"></div>
+      <div class="card"><div class="card-t">🕘 Recent GD Records</div><div class="tw"><table><thead><tr><th>Date</th><th>GD No</th><th>Client</th><th>Vehicles</th><th>Empty Weight</th><th>Service</th><th>Tax</th><th>Total</th><th>Paid</th><th>Baqi</th><th>Status</th></tr></thead><tbody id="dashRows"></tbody></table></div></div>
+    </div>
+
+    <div id="pg-clients" class="page">
+      <div class="ph"><div class="ph-title">👥 Clients</div><div class="ph-sub">Har client ka separate account / ledger</div></div>
+      <div class="sbar"><input id="clientSearch" oninput="renderClients()" placeholder="🔍 Client naam / phone search karein"><button class="btn btn-teal" onclick="go('addClient')">➕ Naya Client</button></div>
+      <div id="clientsArea"></div>
+    </div>
+
+    <div id="pg-addClient" class="page">
+      <div class="ph"><div class="ph-title">➕ Naya Client Add Karein</div><div class="ph-sub">Client add karne ke baad GD us ke account mein automatically chali jayegi</div></div>
+      <div class="card">
+        <div class="sec-lbl">Client Information</div>
+        <div class="fg2">
+          <div class="fg"><label>Client Name *</label><input id="cl_name" placeholder="Example: Ahmad Traders"></div>
+          <div class="fg"><label>Phone</label><input id="cl_phone" placeholder="03XX-XXXXXXX"></div>
+          <div class="fg"><label>NTN / CNIC</label><input id="cl_ntn" placeholder="Optional"></div>
+          <div class="fg"><label>City / Address</label><input id="cl_addr" placeholder="Optional"></div>
+          <div class="fg fgf"><label>Notes</label><input id="cl_notes" placeholder="Optional remarks"></div>
+        </div>
+        <div class="brow"><button class="btn btn-teal" onclick="saveClient()">💾 Save Client</button><button class="btn btn-out" onclick="clearClientForm()">Clear</button></div>
+      </div>
+    </div>
+
+    <div id="pg-addGD" class="page">
+      <div class="ph"><div class="ph-title">🧾 GD Master Entry</div><div class="ph-sub">Pehle GD add karein: date, GD number, client, total vehicles, rate aur empty weight</div></div>
+      <div class="card">
+        <div class="sec-lbl">GD Basic Information</div>
+        <div class="fg4">
+          <div class="fg"><label>Date *</label><input type="date" id="gd_date"></div>
+          <div class="fg"><label>GD Number *</label><input id="gd_no" placeholder="GD-2026-001"></div>
+          <div class="fg"><label>Client *</label><select id="gd_client"></select></div>
+          <div class="fg"><label>Total Vehicles *</label><input type="number" id="gd_vehicles" placeholder="0"></div>
+          <div class="fg"><label>Rate Per Empty Weight *</label><input type="number" id="gd_rate" placeholder="0" oninput="calcGD()"></div>
+          <div class="fg"><label>Quantity / Empty Weight *</label><input type="number" id="gd_qty" placeholder="0" oninput="calcGD()"></div>
+          <div class="fg"><label>Service Total</label><input id="gd_service_total" readonly placeholder="Auto"></div>
+          <div class="fg"><label>Goods / Description</label><input id="gd_goods" placeholder="Optional"></div>
+          <div class="fg"><label>Port / Station</label><input id="gd_port" placeholder="Karachi / Torkham / etc."></div>
+          <div class="fg"><label>Container / Vehicle Ref</label><input id="gd_container" placeholder="Optional"></div>
+          <div class="fg fgf"><label>Remarks</label><input id="gd_notes" placeholder="Optional"></div>
+        </div>
+        <div class="totalbox">
+          <div class="totalgrid">
+            <div class="mini"><div class="mini-l">Vehicles</div><div class="mini-v" id="pvVehicles">0</div></div>
+            <div class="mini"><div class="mini-l">Empty Weight</div><div class="mini-v" id="pvQty">0</div></div>
+            <div class="mini"><div class="mini-l">Rate</div><div class="mini-v" id="pvRate">Rs.0</div></div>
+            <div class="mini dark"><div class="mini-l">Service Total</div><div class="mini-v" id="pvService">Rs.0</div></div>
+          </div>
+        </div>
+        <div class="brow"><button class="btn btn-teal" onclick="saveGD()">💾 Save GD</button><button class="btn btn-a" onclick="saveGD(true)">Save & Add Tax Next</button><button class="btn btn-out" onclick="clearGDForm()">Clear</button></div>
+      </div>
+    </div>
+
+    <div id="pg-taxDetails" class="page">
+      <div class="ph"><div class="ph-title">💰 GD Tax / Charges Details</div><div class="ph-sub">Pehle saved GD select karein, phir us GD mein duty/tax aur other charges add karein</div></div>
+      <div class="card">
+        <div class="sec-lbl">Select GD</div>
+        <div class="fg3">
+          <div class="fg"><label>GD Number *</label><select id="tx_gd" onchange="loadTaxGD()"></select></div>
+          <div class="fg"><label>Client</label><input id="tx_client_name" readonly></div>
+          <div class="fg"><label>Service Total</label><input id="tx_service_total" readonly></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sec-lbl">Government Taxes / Charges</div>
+        <div class="fg4">
+          <div class="fg"><label>Customs Duty</label><input type="number" id="tx_duty" placeholder="0" oninput="calcTax()"></div>
+          <div class="fg"><label>Sales Tax</label><input type="number" id="tx_stax" placeholder="0" oninput="calcTax()"></div>
+          <div class="fg"><label>Income Tax</label><input type="number" id="tx_itax" placeholder="0" oninput="calcTax()"></div>
+          <div class="fg"><label>Additional Sales Tax</label><input type="number" id="tx_astax" placeholder="0" oninput="calcTax()"></div>
+          <div class="fg"><label>Regulatory Duty</label><input type="number" id="tx_rd" placeholder="0" oninput="calcTax()"></div>
+          <div class="fg"><label>Warehouse / Port Charges</label><input type="number" id="tx_port" placeholder="0" oninput="calcTax()"></div>
+          <div class="fg"><label>Other Govt Charges</label><input type="number" id="tx_other" placeholder="0" oninput="calcTax()"></div>
+          <div class="fg"><label>Misc / Handling</label><input type="number" id="tx_misc" placeholder="0" oninput="calcTax()"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sec-lbl">Payment / Adjustment</div>
+        <div class="fg3">
+          <div class="fg"><label>Advance Payment Received</label><input type="number" id="tx_advance" placeholder="0" oninput="calcTax()"></div>
+          <div class="fg"><label>Payment Method</label><select id="tx_pay_method"><option>Cash</option><option>Bank Transfer</option><option>Cheque</option><option>JazzCash/EasyPaisa</option><option>Online</option></select></div>
+          <div class="fg"><label>Reference / Note</label><input id="tx_note" placeholder="Optional"></div>
+        </div>
+        <div class="totalbox">
+          <div class="totalgrid">
+            <div class="mini"><div class="mini-l">Service Total</div><div class="mini-v" id="txPrevService">Rs.0</div></div>
+            <div class="mini"><div class="mini-l">Total Taxes</div><div class="mini-v" id="txPrevTax">Rs.0</div></div>
+            <div class="mini"><div class="mini-l">Advance</div><div class="mini-v" id="txPrevAdv">Rs.0</div></div>
+            <div class="mini dark"><div class="mini-l">Grand Total</div><div class="mini-v" id="txPrevGrand">Rs.0</div></div>
+          </div>
+        </div>
+        <div class="brow"><button class="btn btn-teal" onclick="saveTaxDetails()">💾 Save Tax Details</button><button class="btn btn-out" onclick="clearTaxForm(false)">Clear Tax Fields</button></div>
+      </div>
+    </div>
+
+    <div id="pg-gdList" class="page">
+      <div class="ph"><div class="ph-title">📦 GD Records</div><div class="ph-sub">GD master + tax details ka complete record</div></div>
+      <div class="sbar"><input id="gdSearch" oninput="renderGDList()" placeholder="🔍 GD, client, goods search"><select id="gdStatus" onchange="renderGDList()"><option value="">All Status</option><option value="paid">Paid</option><option value="partial">Partial</option><option value="unpaid">Unpaid</option></select><button class="btn btn-teal" onclick="go('addGD')">🧾 Add GD</button></div>
+      <div class="card" style="padding:0"><div class="tw"><table><thead><tr><th>Date</th><th>GD No</th><th>Client</th><th>Vehicles</th><th>Service</th><th>Tax</th><th>Grand Total</th><th>Paid</th><th>Baqi</th><th>Status</th><th>Actions</th></tr></thead><tbody id="gdRows"></tbody></table></div></div>
+    </div>
+
+    <div id="pg-payments" class="page">
+      <div class="ph"><div class="ph-title">💵 Payment Received</div><div class="ph-sub">GD-wise ya client-wise payments add karein</div></div>
+      <div class="card">
+        <div class="sec-lbl">Add Payment</div>
+        <div class="fg4">
+          <div class="fg"><label>Date *</label><input type="date" id="pay_date"></div>
+          <div class="fg"><label>GD Number *</label><select id="pay_gd" onchange="loadPayGD()"></select></div>
+          <div class="fg"><label>Client</label><input id="pay_client_name" readonly></div>
+          <div class="fg"><label>Amount *</label><input type="number" id="pay_amount" placeholder="0"></div>
+          <div class="fg"><label>Method</label><select id="pay_method"><option>Cash</option><option>Bank Transfer</option><option>Cheque</option><option>JazzCash/EasyPaisa</option><option>Online</option></select></div>
+          <div class="fg fgf"><label>Note / Reference</label><input id="pay_note" placeholder="Transaction ID, bank name, remarks"></div>
+        </div>
+        <div class="brow"><button class="btn btn-teal" onclick="savePayment()">💾 Save Payment</button></div>
+      </div>
+      <div class="card" style="padding:0"><div class="tw"><table><thead><tr><th>Date</th><th>GD No</th><th>Client</th><th>Method</th><th>Note</th><th class="right">Amount</th><th>Action</th></tr></thead><tbody id="payRows"></tbody></table></div></div>
+    </div>
+
+    <div id="pg-statements" class="page">
+      <div class="ph"><div class="ph-title">📄 Client Statement</div><div class="ph-sub">Bank statement style ledger: GD debit, taxes debit, payments credit</div></div>
+      <div class="card">
+        <div class="sbar no-print"><select id="stmt_client" onchange="renderStatement()"></select><button class="btn btn-ink" onclick="window.print()">🖨 Print</button></div>
+        <div id="statementArea"></div>
+      </div>
+    </div>
+
+    <div id="pg-backup" class="page">
+      <div class="ph"><div class="ph-title">🗂 Backup / Restore</div><div class="ph-sub">Local data backup. Firebase Part 2 mein add ho sakta hai.</div></div>
+      <div class="card">
+        <div class="brow">
+          <button class="btn btn-teal" onclick="downloadBackup()">Download Backup JSON</button>
+          <input type="file" id="restoreFile" accept="application/json" onchange="restoreBackup(event)">
+          <button class="btn btn-r" onclick="resetAll()">Reset All Data</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottomnav">
+    <div class="bn-item on" data-pg="dash" onclick="go('dash')"><span class="bn-ico">📊</span>Home</div>
+    <div class="bn-item" data-pg="clients" onclick="go('clients')"><span class="bn-ico">👥</span>Clients</div>
+    <div class="bn-item" data-pg="addGD" onclick="go('addGD')"><span class="bn-ico">🧾</span>GD</div>
+    <div class="bn-item" data-pg="taxDetails" onclick="go('taxDetails')"><span class="bn-ico">💰</span>Tax</div>
+    <div class="bn-item" data-pg="statements" onclick="go('statements')"><span class="bn-ico">📄</span>Ledger</div>
+  </div>
+</div>
+
+<div class="mbg" id="detailModal">
+  <div class="modal">
+    <div class="mhdr"><div class="mtitle" id="detailTitle">GD Detail</div><button class="mclose" onclick="closeM('detailModal')">×</button></div>
+    <div id="detailBody"></div>
+  </div>
+</div>
+
+<script>
+let DB={clients:[],gds:[]};
+const KEY='custom_clearing_gd_tax_v1';
+function load(){try{const d=localStorage.getItem(KEY); if(d) DB=JSON.parse(d);}catch(e){DB={clients:[],gds:[]};}}
+function save(){localStorage.setItem(KEY,JSON.stringify(DB));}
+load();
+
+const Rs=n=>'Rs.'+Math.round(Number(n||0)).toLocaleString('en-PK');
+const num=id=>Number(document.getElementById(id).value||0);
+const uid=p=>p+Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const today=()=>new Date().toISOString().slice(0,10);
+function client(id){return DB.clients.find(x=>x.id===id)}
+function gd(id){return DB.gds.find(x=>x.id===id)}
+function clientName(id){const c=client(id);return c?c.name:'—'}
+function taxTotal(g){return Number(g.tax?.duty||0)+Number(g.tax?.stax||0)+Number(g.tax?.itax||0)+Number(g.tax?.astax||0)+Number(g.tax?.rd||0)+Number(g.tax?.port||0)+Number(g.tax?.other||0)+Number(g.tax?.misc||0)}
+function paidTotal(g){return (g.payments||[]).reduce((s,p)=>s+Number(p.amount||0),0)}
+function grandTotal(g){return Number(g.serviceTotal||0)+taxTotal(g)}
+function balance(g){return grandTotal(g)-paidTotal(g)}
+function status(g){const p=paidTotal(g), t=grandTotal(g); if(t>0 && p>=t)return'paid'; if(p>0)return'partial'; return'unpaid'}
+function badge(st){return st==='paid'?'<span class="bdg bdg-g">Paid</span>':st==='partial'?'<span class="bdg bdg-a">Partial</span>':'<span class="bdg bdg-r">Unpaid</span>'}
+function showAlert(msg,type='ok'){const el=document.getElementById('gAlert');el.className='alert alert-'+(type==='err'?'err':'ok');el.innerText=msg;el.style.display='flex';setTimeout(()=>el.style.display='none',2600)}
+function closeM(id){document.getElementById(id).classList.remove('open')}
+document.querySelectorAll('.mbg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('open')}));
+
+function go(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('pg-'+name).classList.add('on');
+  document.querySelectorAll('.nav').forEach(n=>n.classList.remove('on'));
+  const navs=[...document.querySelectorAll('.nav')];
+  const map={dash:0,clients:1,addClient:2,addGD:3,taxDetails:4,gdList:5,payments:6,statements:7,backup:8};
+  if(navs[map[name]])navs[map[name]].classList.add('on');
+  document.querySelectorAll('.bn-item').forEach(b=>b.classList.toggle('on',b.dataset.pg===name));
+  window.scrollTo(0,0);
+  renderAll();
+}
+
+function fillSelects(){
+  const clientOpts='<option value="">-- Select Client --</option>'+DB.clients.map(c=>`<option value="${c.id}">${c.name}</option>`).join('');
+  ['gd_client','stmt_client'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML=clientOpts});
+  const gdOpts='<option value="">-- Select GD --</option>'+DB.gds.map(g=>`<option value="${g.id}">${g.gdNo} — ${clientName(g.clientId)} — ${Rs(grandTotal(g))}</option>`).join('');
+  ['tx_gd','pay_gd'].forEach(id=>{const el=document.getElementById(id); if(el) el.innerHTML=gdOpts});
+}
+
+function saveClient(){
+  const name=document.getElementById('cl_name').value.trim();
+  if(!name)return showAlert('Client name zaroor likhein','err');
+  DB.clients.unshift({id:uid('c'),name,phone:cl_phone.value,ntn:cl_ntn.value,addr:cl_addr.value,notes:cl_notes.value,createdAt:new Date().toISOString()});
+  save(); clearClientForm(); showAlert('Client save ho gaya'); go('clients');
+}
+function clearClientForm(){['cl_name','cl_phone','cl_ntn','cl_addr','cl_notes'].forEach(id=>document.getElementById(id).value='')}
+function renderClients(){
+  const q=(clientSearch?.value||'').toLowerCase();
+  const list=DB.clients.filter(c=>!q||c.name.toLowerCase().includes(q)||(c.phone||'').includes(q));
+  clientsArea.innerHTML=list.length?list.map(c=>{
+    const gs=DB.gds.filter(g=>g.clientId===c.id), total=gs.reduce((s,g)=>s+grandTotal(g),0), paid=gs.reduce((s,g)=>s+paidTotal(g),0), bal=total-paid;
+    return `<div class="card"><div style="display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div><div style="font-size:16px;font-weight:900">${c.name}</div><div class="muted" style="font-size:12px">${c.phone||''} ${c.ntn?' · NTN/CNIC: '+c.ntn:''}</div><div class="muted" style="font-size:12px">${c.addr||''}</div></div>
+      <div class="brow" style="margin:0">
+        <span class="bdg bdg-b">GD: ${gs.length}</span><span class="bdg bdg-a">Total: ${Rs(total)}</span><span class="bdg bdg-g">Paid: ${Rs(paid)}</span><span class="bdg bdg-r">Baqi: ${Rs(bal)}</span>
+        <button class="btn btn-teal btn-sm" onclick="quickGD('${c.id}')">Add GD</button><button class="btn btn-ink btn-sm" onclick="openClientStatement('${c.id}')">Statement</button>
+      </div></div></div>`
+  }).join(''):'<div class="empty"><div class="emo">👥</div>No clients found</div>';
+}
+function quickGD(cid){go('addGD'); setTimeout(()=>{gd_client.value=cid},20)}
+
+function calcGD(){
+  const rate=num('gd_rate'), qty=num('gd_qty'), vehicles=num('gd_vehicles'), total=rate*qty;
+  gd_service_total.value=Rs(total); pvVehicles.innerText=vehicles; pvQty.innerText=qty; pvRate.innerText=Rs(rate); pvService.innerText=Rs(total);
+}
+function saveGD(next=false){
+  const date=gd_date.value||today(), gdNo=gd_no.value.trim(), clientId=gd_client.value;
+  const vehicles=num('gd_vehicles'), rate=num('gd_rate'), qty=num('gd_qty'), serviceTotal=rate*qty;
+  if(!gdNo||!clientId||!vehicles||!rate||!qty)return showAlert('GD No, Client, Vehicles, Rate aur Empty Weight zaroor bharen','err');
+  const rec={id:uid('g'),date,gdNo,clientId,vehicles,rate,qty,serviceTotal,goods:gd_goods.value,port:gd_port.value,container:gd_container.value,notes:gd_notes.value,tax:{},payments:[],createdAt:new Date().toISOString()};
+  DB.gds.unshift(rec); save(); clearGDForm(); showAlert('GD save ho gayi');
+  if(next){go('taxDetails'); setTimeout(()=>{tx_gd.value=rec.id; loadTaxGD()},20)} else go('gdList');
+}
+function clearGDForm(){['gd_no','gd_vehicles','gd_rate','gd_qty','gd_service_total','gd_goods','gd_port','gd_container','gd_notes'].forEach(id=>document.getElementById(id).value=''); gd_date.value=today(); calcGD()}
+
+function loadTaxGD(){
+  const g=gd(tx_gd.value); if(!g){tx_client_name.value='';tx_service_total.value='';clearTaxForm(false);return}
+  tx_client_name.value=clientName(g.clientId); tx_service_total.value=Rs(g.serviceTotal); txPrevService.innerText=Rs(g.serviceTotal);
+  tx_duty.value=g.tax?.duty||''; tx_stax.value=g.tax?.stax||''; tx_itax.value=g.tax?.itax||''; tx_astax.value=g.tax?.astax||''; tx_rd.value=g.tax?.rd||''; tx_port.value=g.tax?.port||''; tx_other.value=g.tax?.other||''; tx_misc.value=g.tax?.misc||''; tx_note.value=g.tax?.note||''; calcTax();
+}
+function calcTax(){
+  const g=gd(tx_gd.value); const service=g?Number(g.serviceTotal||0):0;
+  const tt=num('tx_duty')+num('tx_stax')+num('tx_itax')+num('tx_astax')+num('tx_rd')+num('tx_port')+num('tx_other')+num('tx_misc');
+  const adv=num('tx_advance');
+  txPrevService.innerText=Rs(service); txPrevTax.innerText=Rs(tt); txPrevAdv.innerText=Rs(adv); txPrevGrand.innerText=Rs(service+tt);
+}
+function saveTaxDetails(){
+  const g=gd(tx_gd.value); if(!g)return showAlert('Pehle GD select karein','err');
+  g.tax={duty:num('tx_duty'),stax:num('tx_stax'),itax:num('tx_itax'),astax:num('tx_astax'),rd:num('tx_rd'),port:num('tx_port'),other:num('tx_other'),misc:num('tx_misc'),note:tx_note.value,updatedAt:new Date().toISOString()};
+  const adv=num('tx_advance');
+  if(adv>0){g.payments.push({id:uid('p'),date:today(),amount:adv,method:tx_pay_method.value,note:tx_note.value||'Advance payment while tax details saved'});}
+  save(); showAlert('Tax details save ho gayi'); clearTaxForm(true); go('gdList');
+}
+function clearTaxForm(keepSelect=true){
+  ['tx_duty','tx_stax','tx_itax','tx_astax','tx_rd','tx_port','tx_other','tx_misc','tx_advance','tx_note'].forEach(id=>document.getElementById(id).value='');
+  if(!keepSelect){tx_gd.value=''; tx_client_name.value=''; tx_service_total.value=''}
+  calcTax();
+}
+
+function renderGDList(){
+  const q=(gdSearch?.value||'').toLowerCase(), st=gdStatus?.value||'';
+  const rows=DB.gds.filter(g=>(!q||g.gdNo.toLowerCase().includes(q)||clientName(g.clientId).toLowerCase().includes(q)||(g.goods||'').toLowerCase().includes(q))&&(!st||status(g)===st));
+  gdRows.innerHTML=rows.length?rows.map(g=>gdRow(g)).join(''):'<tr><td colspan="11"><div class="empty"><div class="emo">📦</div>No GD records</div></td></tr>';
+}
+function gdRow(g){
+  return `<tr><td>${g.date}</td><td class="bold">${g.gdNo}</td><td>${clientName(g.clientId)}</td><td>${g.vehicles}</td><td class="right">${Rs(g.serviceTotal)}</td><td class="right">${Rs(taxTotal(g))}</td><td class="right bold">${Rs(grandTotal(g))}</td><td class="right" style="color:var(--green);font-weight:800">${Rs(paidTotal(g))}</td><td class="right" style="color:var(--red);font-weight:800">${Rs(balance(g))}</td><td>${badge(status(g))}</td><td><button class="btn btn-b btn-sm" onclick="editTax('${g.id}')">Tax</button> <button class="btn btn-g btn-sm" onclick="quickPay('${g.id}')">Pay</button> <button class="btn btn-out btn-sm" onclick="openDetail('${g.id}')">View</button> <button class="btn btn-r btn-sm" onclick="deleteGD('${g.id}')">Del</button></td></tr>`
+}
+function editTax(id){go('taxDetails');setTimeout(()=>{tx_gd.value=id;loadTaxGD()},20)}
+function quickPay(id){go('payments');setTimeout(()=>{pay_gd.value=id;loadPayGD()},20)}
+function deleteGD(id){if(confirm('GD delete karni hai?')){DB.gds=DB.gds.filter(g=>g.id!==id);save();renderAll();showAlert('GD delete ho gayi')}}
+
+function loadPayGD(){const g=gd(pay_gd.value); pay_client_name.value=g?clientName(g.clientId):''}
+function savePayment(){
+  const g=gd(pay_gd.value), amount=num('pay_amount'); if(!g||!amount)return showAlert('GD aur amount zaroor bharen','err');
+  g.payments.push({id:uid('p'),date:pay_date.value||today(),amount,method:pay_method.value,note:pay_note.value});
+  save(); pay_amount.value=pay_note.value=''; pay_date.value=today(); showAlert('Payment save ho gayi'); renderAll();
+}
+function renderPayments(){
+  const rows=[]; DB.gds.forEach(g=>(g.payments||[]).forEach(p=>rows.push({g,p})));
+  rows.sort((a,b)=>(b.p.date||'').localeCompare(a.p.date||''));
+  payRows.innerHTML=rows.length?rows.map(x=>`<tr><td>${x.p.date}</td><td>${x.g.gdNo}</td><td>${clientName(x.g.clientId)}</td><td>${x.p.method}</td><td>${x.p.note||'-'}</td><td class="right bold">${Rs(x.p.amount)}</td><td><button class="btn btn-r btn-sm" onclick="deletePayment('${x.g.id}','${x.p.id}')">Delete</button></td></tr>`).join(''):'<tr><td colspan="7"><div class="empty"><div class="emo">💵</div>No payments</div></td></tr>';
+}
+function deletePayment(gid,pid){const g=gd(gid); if(!g)return; if(confirm('Payment delete karni hai?')){g.payments=g.payments.filter(p=>p.id!==pid);save();renderAll()}}
+
+function renderStatement(){
+  const cid=stmt_client.value; if(!cid){statementArea.innerHTML='<div class="empty"><div class="emo">📄</div>Select client to view statement</div>';return}
+  buildStatement(cid);
+}
+function openClientStatement(cid){go('statements');setTimeout(()=>{stmt_client.value=cid;buildStatement(cid)},20)}
+function buildStatement(cid){
+  const c=client(cid), gs=DB.gds.filter(g=>g.clientId===cid).sort((a,b)=>a.date.localeCompare(b.date));
+  let events=[];
+  gs.forEach(g=>{
+    events.push({date:g.date,detail:`GD ${g.gdNo} — Service charges (${g.vehicles} vehicles, empty weight ${g.qty}, rate ${g.rate})`,debit:Number(g.serviceTotal),credit:0,type:'Service'});
+    const tt=taxTotal(g); if(tt>0)events.push({date:g.tax?.updatedAt?g.tax.updatedAt.slice(0,10):g.date,detail:`GD ${g.gdNo} — Customs duty/taxes/charges`,debit:tt,credit:0,type:'Tax'});
+    (g.payments||[]).forEach(p=>events.push({date:p.date,detail:`Payment received against GD ${g.gdNo} (${p.method}) ${p.note?'- '+p.note:''}`,debit:0,credit:Number(p.amount),type:'Payment'}));
+  });
+  events.sort((a,b)=>a.date.localeCompare(b.date));
+  let bal=0,totalDebit=0,totalCredit=0;
+  const rows=events.map(e=>{bal+=e.debit-e.credit;totalDebit+=e.debit;totalCredit+=e.credit;return `<tr><td>${e.date}</td><td>${e.detail}</td><td>${e.type}</td><td class="right" style="color:var(--red);font-weight:800">${e.debit?Rs(e.debit):'-'}</td><td class="right" style="color:var(--green);font-weight:800">${e.credit?Rs(e.credit):'-'}</td><td class="right bold">${Rs(bal)}</td></tr>`}).join('');
+  statementArea.innerHTML=`<div class="statement-head"><div><div style="font-size:18px;font-weight:900">${c.name}</div><div class="hdr-sub">${c.phone||''} ${c.addr?' · '+c.addr:''} ${c.ntn?' · NTN/CNIC: '+c.ntn:''}</div></div><div><div class="hdr-sub">Print Date: ${new Date().toLocaleDateString('en-PK')}</div><div class="bal">Balance: ${Rs(totalDebit-totalCredit)}</div></div></div>
+  <div class="tw" style="border-radius:0"><table><thead><tr><th>Date</th><th>Particulars</th><th>Type</th><th class="right">Debit</th><th class="right">Credit</th><th class="right">Balance</th></tr></thead><tbody>${rows||'<tr><td colspan="6"><div class="empty">No statement data</div></td></tr>'}</tbody></table></div>
+  <div class="statement-total"><div>Total Debit: <b>${Rs(totalDebit)}</b> &nbsp; Total Credit: <b style="color:#4ADE80">${Rs(totalCredit)}</b></div><div class="bal">Closing Balance: ${Rs(totalDebit-totalCredit)}</div></div>`;
+}
+
+function openDetail(id){
+  const g=gd(id); if(!g)return;
+  detailTitle.innerText='GD Detail — '+g.gdNo;
+  detailBody.innerHTML=`<div class="fg2">
+    <div class="card" style="box-shadow:none;border:1px solid var(--border)"><div class="sec-lbl">GD Master</div>
+      <p><b>Client:</b> ${clientName(g.clientId)}</p><p><b>Date:</b> ${g.date}</p><p><b>Vehicles:</b> ${g.vehicles}</p><p><b>Rate:</b> ${Rs(g.rate)}</p><p><b>Empty Weight:</b> ${g.qty}</p><p><b>Service Total:</b> ${Rs(g.serviceTotal)}</p><p><b>Goods:</b> ${g.goods||'-'}</p><p><b>Port:</b> ${g.port||'-'}</p></div>
+    <div class="card" style="box-shadow:none;border:1px solid var(--border)"><div class="sec-lbl">Tax & Payment</div>
+      <p><b>Customs Duty:</b> ${Rs(g.tax?.duty||0)}</p><p><b>Sales Tax:</b> ${Rs(g.tax?.stax||0)}</p><p><b>Income Tax:</b> ${Rs(g.tax?.itax||0)}</p><p><b>Other Taxes/Charges:</b> ${Rs(taxTotal(g)-Number(g.tax?.duty||0)-Number(g.tax?.stax||0)-Number(g.tax?.itax||0))}</p><p><b>Total Tax:</b> ${Rs(taxTotal(g))}</p><p><b>Grand Total:</b> ${Rs(grandTotal(g))}</p><p><b>Paid:</b> ${Rs(paidTotal(g))}</p><p><b>Balance:</b> ${Rs(balance(g))}</p></div>
+  </div>`;
+  detailModal.classList.add('open');
+}
+
+function renderDash(){
+  const totalGD=DB.gds.length, totalClients=DB.clients.length, service=DB.gds.reduce((s,g)=>s+Number(g.serviceTotal||0),0), tax=DB.gds.reduce((s,g)=>s+taxTotal(g),0), paid=DB.gds.reduce((s,g)=>s+paidTotal(g),0), grand=service+tax, bal=grand-paid;
+  dashStats.innerHTML=`<div class="sc"><div class="sl">Clients</div><div class="sv">${totalClients}</div><div class="ss">Total clients</div></div><div class="sc b"><div class="sl">GD Records</div><div class="sv">${totalGD}</div><div class="ss">Total GD entries</div></div><div class="sc a"><div class="sl">Grand Total</div><div class="sv" style="font-size:17px">${Rs(grand)}</div><div class="ss">Service + tax</div></div><div class="sc r"><div class="sl">Baqi Rakam</div><div class="sv" style="font-size:17px">${Rs(bal)}</div><div class="ss">Recoverable</div></div>`;
+  dashRows.innerHTML=DB.gds.slice(0,10).map(g=>`<tr><td>${g.date}</td><td class="bold">${g.gdNo}</td><td>${clientName(g.clientId)}</td><td>${g.vehicles}</td><td>${g.qty}</td><td>${Rs(g.serviceTotal)}</td><td>${Rs(taxTotal(g))}</td><td class="bold">${Rs(grandTotal(g))}</td><td>${Rs(paidTotal(g))}</td><td>${Rs(balance(g))}</td><td>${badge(status(g))}</td></tr>`).join('')||'<tr><td colspan="11"><div class="empty"><div class="emo">📭</div>No records yet</div></td></tr>';
+}
+function downloadBackup(){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(DB,null,2)],{type:'application/json'}));a.download='custom-clearing-gd-tax-backup.json';a.click()}
+function restoreBackup(e){const f=e.target.files[0]; if(!f)return; const r=new FileReader(); r.onload=()=>{try{DB=JSON.parse(r.result);save();renderAll();showAlert('Backup restore ho gaya')}catch(err){showAlert('Invalid backup file','err')}}; r.readAsText(f)}
+function resetAll(){if(confirm('Saara data delete ho jayega. Continue?')){DB={clients:[],gds:[]};save();renderAll();showAlert('All data reset ho gaya')}}
+function renderAll(){fillSelects();renderDash();renderClients();renderGDList();renderPayments();if(stmt_client.value)renderStatement();}
+gd_date.value=today();pay_date.value=today();hdrDate.innerText=new Date().toLocaleDateString('en-PK',{weekday:'short',day:'numeric',month:'long',year:'numeric'});
+renderAll();
+</script>
+</body>
+</html>
